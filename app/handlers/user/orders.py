@@ -227,7 +227,6 @@ async def process_delivery_location(message: Message, state: FSMContext):
         f"❓ Buyurtmangizni tasdiqlaysizmi?",
         reply_markup=keyboard
     )
-    await state.clear()
 
 
 @router.callback_query(F.data == "order_pickup")
@@ -303,7 +302,7 @@ async def confirm_pickup_branch(callback: CallbackQuery, state: FSMContext):
 
 
 @router.callback_query(F.data == "confirm_order_no")
-async def confirm_order_no(callback: CallbackQuery):
+async def confirm_order_no(callback: CallbackQuery, state: FSMContext):
     from app.database.requests import get_user_by_tg_id
     from app.database.order_requests import get_basket_items
     
@@ -340,6 +339,7 @@ async def confirm_order_no(callback: CallbackQuery):
         
         await callback.message.edit_text(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard))
     
+    await state.clear()
     await callback.answer()
 
 
