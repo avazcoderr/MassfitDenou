@@ -227,7 +227,6 @@ async def process_delivery_location(message: Message, state: FSMContext):
         f"❓ Buyurtmangizni tasdiqlaysizmi?",
         reply_markup=keyboard
     )
-    await state.clear()
 
 
 @router.callback_query(F.data == "order_pickup")
