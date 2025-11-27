@@ -1,5 +1,6 @@
 aiofiles==24.1.0
 aiogram==3.22.0
+<<<<<<< HEAD
 aiohappyeyeballs==2.6.1
 aiohttp==3.12.15
 aiosignal==1.4.0
@@ -24,3 +25,9 @@ SQLAlchemy==2.0.23
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 yarl==1.22.0
+=======
+python-dotenv==1.2.1
+sqlalchemy==2.0.44
+asyncpg==0.30.0
+alembic==1.17.2
+>>>>>>> 7c0154e9ae7517ee055d73789d7c075e2dc99897
