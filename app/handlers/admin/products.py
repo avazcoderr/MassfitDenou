@@ -141,6 +141,11 @@ async def process_product_price(message: Message, state: FSMContext):
             inline_keyboard=[
                 [InlineKeyboardButton(text="🔻 Weight Loss", callback_data="type_weight_loss")],
                 [InlineKeyboardButton(text="🔺 Weight Gain", callback_data="type_weight_gain")],
+                [InlineKeyboardButton(text="🍳 Nonushta", callback_data="type_nonushta")],
+                [InlineKeyboardButton(text="🥤 Detox", callback_data="type_detox")],
+                [InlineKeyboardButton(text="🍽 Tushliklar", callback_data="type_tushliklar")],
+                [InlineKeyboardButton(text="🍓 FruitMix", callback_data="type_fruitmix")],
+                [InlineKeyboardButton(text="🌙 Kechki ovqat", callback_data="type_kechki_ovqat")],
                 [InlineKeyboardButton(text="❌ Cancel", callback_data="admin_panel")]
             ]
         )
@@ -159,11 +164,25 @@ async def process_product_price(message: Message, state: FSMContext):
 
 @router.callback_query(ProductStates.waiting_for_type, F.data.startswith("type_"))
 async def process_product_type(callback: CallbackQuery, state: FSMContext):
-    product_type = "weight_loss" if callback.data == "type_weight_loss" else "weight_gain"
+    type_mapping = {
+        "type_weight_loss": "weight_loss",
+        "type_weight_gain": "weight_gain",
+        "type_nonushta": "Nonushta",
+        "type_detox": "Detox",
+        "type_tushliklar": "tushliklar",
+        "type_fruitmix": "FruitMix",
+        "type_kechki_ovqat": "kechki ovqat"
+    }
+    
+    product_type = type_mapping.get(callback.data)
+    if not product_type:
+        await callback.answer("Noto'g'ri tur tanlandi!", show_alert=True)
+        return
+        
     await state.update_data(type=product_type)
     
     await callback.message.edit_text(
-        f"✅ Turi: <b>{product_type.replace('_', ' ').title()}</b>\n\n"
+        f"✅ Turi: <b>{product_type}</b>\n\n"
         "Endi mahsulot tavsifini kiriting (yoki o'tkazib yuborish uchun /skip yuboring):"
     )
     await state.set_state(ProductStates.waiting_for_description)
@@ -393,8 +412,13 @@ async def edit_type_start(callback: CallbackQuery, state: FSMContext):
     
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🔻 Vazn yo'qotish", callback_data=f"edittype_weight_loss_{product_id}")],
-            [InlineKeyboardButton(text="🔺 Vazn orttirish", callback_data=f"edittype_weight_gain_{product_id}")],
+            [InlineKeyboardButton(text="🌿 Vazn yo'qotish", callback_data=f"edittype_weight_loss_{product_id}")],
+            [InlineKeyboardButton(text="🐷 Vazn orttirish", callback_data=f"edittype_weight_gain_{product_id}")],
+            [InlineKeyboardButton(text="🍳 Nonushta", callback_data=f"edittype_nonushta_{product_id}")],
+            [InlineKeyboardButton(text="🥤 Detox", callback_data=f"edittype_detox_{product_id}")],
+            [InlineKeyboardButton(text="🍽 Tushliklar", callback_data=f"edittype_tushliklar_{product_id}")],
+            [InlineKeyboardButton(text="🍓 FruitMix", callback_data=f"edittype_fruitmix_{product_id}")],
+            [InlineKeyboardButton(text="🌙 Kechki ovqat", callback_data=f"edittype_kechki_ovqat_{product_id}")],
             [InlineKeyboardButton(text="❌ Bekor qilish", callback_data="admin_panel")]
         ]
     )
@@ -410,8 +434,22 @@ async def edit_type_start(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("edittype_"))
 async def process_edit_type(callback: CallbackQuery, state: FSMContext):
     parts = callback.data.split("_")
-    product_type = "weight_loss" if parts[1] == "weight" and parts[2] == "loss" else "weight_gain"
-    product_id = int(parts[-1])
+    
+    # Handle different product types
+    if len(parts) >= 3:
+        if parts[1] == "weight" and parts[2] == "loss":
+            product_type = "weight_loss"
+        elif parts[1] == "weight" and parts[2] == "gain":
+            product_type = "weight_gain"
+        elif parts[1] == "kechki" and parts[2] == "ovqat":
+            product_type = "kechki ovqat"
+        else:
+            product_type = parts[1]  # For single word types like "nonushta", "detox", etc.
+        
+        product_id = int(parts[-1])
+    else:
+        await callback.answer("Noto'g'ri ma'lumot!", show_alert=True)
+        return
     
     async with async_session_maker() as session:
         product = await update_product(session, product_id, product_type=product_type)

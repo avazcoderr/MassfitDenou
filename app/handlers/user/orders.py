@@ -53,7 +53,7 @@ def get_address_from_coords(latitude: float, longitude: float) -> str:
         return "Manzil aniqlanmadi"
 
 
-@router.message(F.text == "📦 Mening buyurtmalarim")
+@router.message(F.text == "🛒 Mening buyurtmalarim")
 async def my_orders(message: Message):
     from app.database.requests import get_user_by_tg_id
     from app.database.order_requests import get_basket_items
