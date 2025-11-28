@@ -4,13 +4,13 @@ from app.database.models import Product
 
 
 async def get_all_products(session: AsyncSession):
-    result = await session.execute(select(Product).order_by(Product.created_at.desc()))
+    result = await session.execute(select(Product).order_by(Product.created_at.asc()))
     return result.scalars().all()
 
 
 async def get_products_by_type(session: AsyncSession, product_type: str):
     result = await session.execute(
-        select(Product).where(Product.type == product_type).order_by(Product.created_at.desc())
+        select(Product).where(Product.type == product_type).order_by(Product.created_at.asc())
     )
     return result.scalars().all()
 
