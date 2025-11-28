@@ -1,5 +1,15 @@
 import os
+from dotenv import load_dotenv, find_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+
+# Try to load a .env from project root first, fall back to a local .env next to this file
+dotenv_path = find_dotenv()
+if dotenv_path:
+    load_dotenv(dotenv_path)
+else:
+    local_env = os.path.join(os.path.dirname(__file__), ".env")
+    if os.path.exists(local_env):
+        load_dotenv(local_env)
 
 # Do NOT import DATABASE_URL from app.config here — read from env to avoid using a wrong value
 DATABASE_URL = os.getenv("DATABASE_URL")

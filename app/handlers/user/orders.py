@@ -5,12 +5,52 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from app.database.engine import async_session_maker
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut
 
 router = Router()
 
 
 class OrderStates(StatesGroup):
     waiting_for_delivery_location = State()
+
+
+def get_address_from_coords(latitude: float, longitude: float) -> str:
+    """Get address name from coordinates using reverse geocoding."""
+    try:
+        geolocator = Nominatim(user_agent="massfit_bot")
+        location = geolocator.reverse(f"{latitude}, {longitude}", language="uz")
+        if location and location.raw.get('address'):
+            addr = location.raw['address']
+            # Build short address from components
+            parts = []
+            
+            # House number and road/street
+            if addr.get('house_number'):
+                parts.append(addr['house_number'])
+            if addr.get('road'):
+                parts.append(addr['road'])
+            elif addr.get('street'):
+                parts.append(addr['street'])
+            
+            # Neighborhood or suburb
+            if addr.get('neighbourhood'):
+                parts.append(addr['neighbourhood'])
+            elif addr.get('suburb'):
+                parts.append(addr['suburb'])
+            
+            # District
+            if addr.get('city_district'):
+                parts.append(addr['city_district'])
+            
+            if parts:
+                return ", ".join(parts)
+            return location.address
+        return "Manzil aniqlanmadi"
+    except GeocoderTimedOut:
+        return "Manzil aniqlanmadi (timeout)"
+    except Exception:
+        return "Manzil aniqlanmadi"
 
 
 @router.message(F.text == "📦 Mening buyurtmalarim")
@@ -205,10 +245,14 @@ async def process_delivery_location(message: Message, state: FSMContext):
     latitude = message.location.latitude
     longitude = message.location.longitude
     
+    # Get address from coordinates
+    address = get_address_from_coords(latitude, longitude)
+    
     await state.update_data(
         delivery_type='delivery',
         latitude=latitude,
-        longitude=longitude
+        longitude=longitude,
+        address=address
     )
     
     keyboard = InlineKeyboardMarkup(
@@ -222,8 +266,7 @@ async def process_delivery_location(message: Message, state: FSMContext):
     
     await message.answer(
         f"📍 <b>Joylashuv qabul qilindi</b>\n\n"
-        f"Latitude: {latitude}\n"
-        f"Longitude: {longitude}\n\n"
+        f"🏠 Manzil: {address}\n\n"
         f"❓ Buyurtmangizni tasdiqlaysizmi?",
         reply_markup=keyboard
     )
