@@ -70,6 +70,7 @@ class Order(AbstractBaseModel):
     branch_id: Mapped[int] = mapped_column(Integer, ForeignKey('branches.id', ondelete='SET NULL'), nullable=True)
     delivery_latitude: Mapped[float] = mapped_column(Numeric(10, 7), nullable=True)
     delivery_longitude: Mapped[float] = mapped_column(Numeric(10, 7), nullable=True)
+    delivery_address: Mapped[str] = mapped_column(String(500), nullable=True)
     
     user = relationship("User", back_populates="orders", lazy="selectin")
     branch = relationship("Branch", lazy="selectin")

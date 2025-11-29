@@ -83,7 +83,8 @@ async def clear_basket(session: AsyncSession, user_id: int):
 
 # ORDER OPERATIONS
 async def create_order(session: AsyncSession, user_id: int, total_price: float, delivery_type: str = None, 
-                      branch_id: int = None, latitude: float = None, longitude: float = None, group_message_id: int = None):
+                      branch_id: int = None, latitude: float = None, longitude: float = None, 
+                      delivery_address: str = None, group_message_id: int = None):
     order = Order(
         user_id=user_id,
         total_price=total_price,
@@ -92,6 +93,7 @@ async def create_order(session: AsyncSession, user_id: int, total_price: float, 
         branch_id=branch_id,
         delivery_latitude=latitude,
         delivery_longitude=longitude,
+        delivery_address=delivery_address,
         group_message_id=group_message_id
     )
     session.add(order)

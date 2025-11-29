@@ -119,7 +119,7 @@ async def back_to_category(callback: CallbackQuery):
         title = "🌿 <b>Vazn yo'qotish mahsulotlari</b>\n\n"
         description = "Bu toifadagi mahsulotlar tanangizning ortiqcha vaznini yo'qotishga yordam beradi.\n\n"
     elif product_type == "weight_gain":
-        title = "🐷 <b>Vazn olish mahsulotlari</b>\n\n"
+        title = "⚖️ <b>Vazn olish mahsulotlari</b>\n\n"
         description = "Bu toifadagi mahsulotlar tanangizga sog'lom vazn va mushak massasini oshirishga yordam beradi.\n\n"
     elif product_type == "Nonushta":
         title = "🍳 <b>Nonushta</b>\n\n"
@@ -192,14 +192,14 @@ async def lose_weight_menu(message: Message):
     )
 
 
-@router.message(F.text == "🐷 Vazn olish")
+@router.message(F.text == "⚖️ Vazn olish")
 async def gain_weight_menu(message: Message):
     async with async_session_maker() as session:
         products = await get_products_by_type(session, "weight_gain")
     
     if not products:
         await message.answer(
-            "🐷 <b>Vazn olish mahsulotlari</b>\n\n"
+            "⚖️ <b>Vazn olish mahsulotlari</b>\n\n"
             "Bu toifadagi mahsulotlar tanangizga sog'lom vazn va mushak massasini oshirishga yordam beradi.\n\n"
             "Hozircha bu toifada mahsulotlar mavjud emas."
         )
@@ -215,7 +215,7 @@ async def gain_weight_menu(message: Message):
         ])
     
     await message.answer(
-        "🐷 <b>Vazn olish mahsulotlari</b>\n\n"
+        "⚖️ <b>Vazn olish mahsulotlari</b>\n\n"
         "Bu toifadagi mahsulotlar tanangizga sog'lom vazn va mushak massasini oshirishga yordam beradi.\n\n"
         "Batafsil ma'lumot olish uchun mahsulotni tanlang:",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard)

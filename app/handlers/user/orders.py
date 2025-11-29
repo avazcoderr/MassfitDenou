@@ -13,6 +13,7 @@ router = Router()
 
 class OrderStates(StatesGroup):
     waiting_for_delivery_location = State()
+    waiting_for_text_address = State()
 
 
 def get_address_from_coords(latitude: float, longitude: float) -> str:
@@ -53,7 +54,7 @@ def get_address_from_coords(latitude: float, longitude: float) -> str:
         return "Manzil aniqlanmadi"
 
 
-@router.message(F.text == "🛒 Mening buyurtmalarim")
+@router.message(F.text == "📦 Mening buyurtmalarim")
 async def my_orders(message: Message):
     from app.database.requests import get_user_by_tg_id
     from app.database.order_requests import get_basket_items
@@ -231,13 +232,86 @@ async def confirm_order_prompt(callback: CallbackQuery):
 
 @router.callback_query(F.data == "order_delivery")
 async def order_delivery_request_location(callback: CallbackQuery, state: FSMContext):
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="📍 Joylashuv yuborish", callback_data="delivery_location")],
+            [InlineKeyboardButton(text="✍️ Manzilni yozish", callback_data="delivery_text")]
+        ]
+    )
+    
     await callback.message.edit_text(
         "📍 <b>Yetkazib berish manzili</b>\n\n"
+        "Manzilni qanday ko'rsatishni xohlaysiz?\n\n"
+        "• 📍 Joylashuv yuborish - aniq koordinatalar\n"
+        "• ✍️ Manzilni yozish - matn ko'rinishida",
+        reply_markup=keyboard
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "delivery_location")
+async def request_location_coords(callback: CallbackQuery, state: FSMContext):
+    await callback.message.edit_text(
+        "📍 <b>Joylashuvni yuborish</b>\n\n"
         "Iltimos, yetkazib berish uchun joylashuvingizni yuboring.\n"
         "Joylashuvingizni yuborish uchun 📎 qo'shimcha tugmasidan foydalaning."
     )
     await state.set_state(OrderStates.waiting_for_delivery_location)
     await callback.answer()
+
+
+@router.callback_query(F.data == "delivery_text")
+async def request_text_address(callback: CallbackQuery, state: FSMContext):
+    await callback.message.edit_text(
+        "✍️ <b>Manzilni yozish</b>\n\n"
+        "Iltimos, yetkazib berish manzilini matn ko'rinishida yozing.\n\n"
+        "Masalan: Toshkent sh., Yunusobod tumani, Amir Temur ko'chasi, 123-uy\n\n"
+        "⚠️ Manzil 500 belgidan oshmasligi kerak."
+    )
+    await state.set_state(OrderStates.waiting_for_text_address)
+    await callback.answer()
+
+
+@router.message(OrderStates.waiting_for_text_address)
+async def process_text_address(message: Message, state: FSMContext):
+    address = message.text.strip()
+    
+    if len(address) > 500:
+        await message.answer(
+            "❌ <b>Manzil juda uzun!</b>\n\n"
+            "Iltimos, 500 belgidan kam bo'lgan manzilni kiriting."
+        )
+        return
+    
+    if len(address) < 10:
+        await message.answer(
+            "❌ <b>Manzil juda qisqa!</b>\n\n"
+            "Iltimos, to'liq manzilni kiriting."
+        )
+        return
+    
+    await state.update_data(
+        delivery_type='delivery',
+        latitude=None,
+        longitude=None,
+        address=address
+    )
+    
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="✅ Ha", callback_data="confirm_order_yes_delivery"),
+                InlineKeyboardButton(text="❌ Yo'q", callback_data="confirm_order_no")
+            ]
+        ]
+    )
+    
+    await message.answer(
+        f"✍️ <b>Manzil qabul qilindi</b>\n\n"
+        f"🏠 Manzil: {address}\n\n"
+        f"❓ Buyurtmangizni tasdiqlaysizmi?",
+        reply_markup=keyboard
+    )
 
 
 @router.message(OrderStates.waiting_for_delivery_location, F.location)
@@ -426,7 +500,8 @@ async def confirm_order_yes_delivery(callback: CallbackQuery, state: FSMContext)
             total,
             delivery_type='delivery',
             latitude=data.get('latitude'),
-            longitude=data.get('longitude')
+            longitude=data.get('longitude'),
+            delivery_address=data.get('address')
         )
         
         # Create order items
@@ -441,12 +516,23 @@ async def confirm_order_yes_delivery(callback: CallbackQuery, state: FSMContext)
             )
         
         # Send to group with delivery location
+        address_info = ""
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        text_address = data.get('address')
+        
+        if text_address:
+            address_info = f"🏠 Manzil: {text_address}\n"
+        elif latitude and longitude:
+            address_info = f"📍 Joylashuv koordinatalari yuborilgan\n"
+        
         group_text = (
             f"🆕 <b>Yangi Buyurtma #{order.id}</b>\n\n"
             f"👤 Mijoz: {user.full_name or user.first_name}\n"
             f"📱 Telefon: {user.phone_number or 'Berilmagan'}\n"
             f"🆔 Foydalanuvchi ID: {user.tg_id}\n"
-            f"🚚 Yetkazib berish turi: <b>Yetkazib berish</b>\n\n"
+            f"🚚 Yetkazib berish turi: <b>Yetkazib berish</b>\n"
+            f"{address_info}\n"
             f"📦 <b>Buyurtma mahsulotlari:</b>\n"
             f"{items_text}"
             f"━━━━━━━━━━━━━━━\n"
