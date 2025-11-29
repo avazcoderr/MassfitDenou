@@ -17,7 +17,7 @@ def get_main_menu_keyboard():
     keyboard = ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="🥥 Boshqa mahsulotlar")],
-            [KeyboardButton(text="🔻 Vazn yo'qotish"), KeyboardButton(text="🔺 Vazn olish")],
+            [KeyboardButton(text="🌿 Vazn yo'qotish"), KeyboardButton(text="⚖️ Vazn olish")],
             [KeyboardButton(text="📦 Mening buyurtmalarim")]
         ],
         resize_keyboard=True
