@@ -40,6 +40,16 @@ class ProductStates(StatesGroup):
 
 @router.callback_query(F.data == "admin_view_products")
 async def view_all_products(callback: CallbackQuery):
+    await view_products_page(callback, 0)
+
+
+@router.callback_query(F.data.startswith("products_page_"))
+async def handle_products_page(callback: CallbackQuery):
+    page = int(callback.data.split("_")[2])
+    await view_products_page(callback, page)
+
+
+async def view_products_page(callback: CallbackQuery, page: int):
     async with async_session_maker() as session:
         products = await get_all_products(session)
     
@@ -50,12 +60,16 @@ async def view_all_products(callback: CallbackQuery):
         )
         markup = get_admin_panel_keyboard()
     else:
+        items_per_page = 10
+        total_pages = (len(products) + items_per_page - 1) // items_per_page
+        
         text = (
             f"📦 <b>Mahsulotlar ro'yxati</b>\n\n"
             f"Jami mahsulotlar: {len(products)}\n"
+            f"Sahifa: {page + 1}/{total_pages}\n"
             "Batafsil ma'lumot olish uchun mahsulotni tanlang:"
         )
-        markup = get_product_list_keyboard(products)
+        markup = get_product_list_keyboard(products, page)
     
     # Check if current message has photo (no text to edit)
     if callback.message.photo:
@@ -64,6 +78,12 @@ async def view_all_products(callback: CallbackQuery):
     else:
         await callback.message.edit_text(text, reply_markup=markup)
     
+    await callback.answer()
+
+
+@router.callback_query(F.data.in_(["page_info", "edit_page_info", "delete_page_info"]))
+async def handle_page_info(callback: CallbackQuery):
+    """Handle pagination info button clicks"""
     await callback.answer()
 
 
@@ -268,6 +288,16 @@ async def skip_product_image(message: Message, state: FSMContext):
 # EDIT PRODUCT
 @router.callback_query(F.data == "admin_edit_product")
 async def start_edit_product(callback: CallbackQuery):
+    await edit_products_page(callback, 0)
+
+
+@router.callback_query(F.data.startswith("edit_page_"))
+async def handle_edit_page(callback: CallbackQuery):
+    page = int(callback.data.split("_")[2])
+    await edit_products_page(callback, page)
+
+
+async def edit_products_page(callback: CallbackQuery, page: int):
     async with async_session_maker() as session:
         products = await get_all_products(session)
     
@@ -278,11 +308,16 @@ async def start_edit_product(callback: CallbackQuery):
         )
         markup = get_admin_panel_keyboard()
     else:
+        items_per_page = 10
+        total_pages = (len(products) + items_per_page - 1) // items_per_page
+        
         text = (
             "✏️ <b>Mahsulotni tahrirlash</b>\n\n"
+            f"Jami mahsulotlar: {len(products)}\n"
+            f"Sahifa: {page + 1}/{total_pages}\n"
             "Tahrirlash uchun mahsulotni tanlang:"
         )
-        markup = get_product_edit_keyboard(products)
+        markup = get_product_edit_keyboard(products, page)
     
     # Check if current message has photo (no text to edit)
     if callback.message.photo:
@@ -586,6 +621,16 @@ async def remove_product_image(message: Message, state: FSMContext):
 # DELETE PRODUCT
 @router.callback_query(F.data == "admin_delete_product")
 async def start_delete_product(callback: CallbackQuery):
+    await delete_products_page(callback, 0)
+
+
+@router.callback_query(F.data.startswith("delete_page_"))
+async def handle_delete_page(callback: CallbackQuery):
+    page = int(callback.data.split("_")[2])
+    await delete_products_page(callback, page)
+
+
+async def delete_products_page(callback: CallbackQuery, page: int):
     async with async_session_maker() as session:
         products = await get_all_products(session)
     
@@ -593,11 +638,16 @@ async def start_delete_product(callback: CallbackQuery):
         text = "📦 O'chirish uchun mahsulotlar mavjud emas."
         markup = get_admin_panel_keyboard()
     else:
+        items_per_page = 10
+        total_pages = (len(products) + items_per_page - 1) // items_per_page
+        
         text = (
             "🗑 <b>Mahsulotni o'chirish</b>\n\n"
+            f"Jami mahsulotlar: {len(products)}\n"
+            f"Sahifa: {page + 1}/{total_pages}\n"
             "⚠️ O'chirish uchun mahsulotni tanlang:"
         )
-        markup = get_product_delete_keyboard(products)
+        markup = get_product_delete_keyboard(products, page)
     
     # Check if current message has photo (no text to edit)
     if callback.message.photo:
