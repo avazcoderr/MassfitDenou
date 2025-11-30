@@ -3,6 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from app.database.engine import async_session_maker
 from app.database.product_requests import get_products_by_type, get_product_by_id
+from app.utils.formatters import format_price
 
 router = Router()
 
@@ -62,7 +63,7 @@ async def show_category_products(callback: CallbackQuery):
     for product in products:
         keyboard.append([
             InlineKeyboardButton(
-                text=f"{product.name} - {product.price} so'm",
+                text=f"{product.name} - {format_price(product.price)} so'm",
                 callback_data=f"user_product_{product.id}"
             )
         ])
@@ -109,7 +110,7 @@ async def back_to_category(callback: CallbackQuery):
     for product in products:
         keyboard.append([
             InlineKeyboardButton(
-                text=f"{product.name} - {product.price} so'm",
+                text=f"{product.name} - {format_price(product.price)} so'm",
                 callback_data=f"user_product_{product.id}"
             )
         ])
@@ -179,7 +180,7 @@ async def lose_weight_menu(message: Message):
     for product in products:
         keyboard.append([
             InlineKeyboardButton(
-                text=f"{product.name} - {product.price} so'm",
+                text=f"{product.name} - {format_price(product.price)} so'm",
                 callback_data=f"user_product_{product.id}"
             )
         ])
@@ -209,7 +210,7 @@ async def gain_weight_menu(message: Message):
     for product in products:
         keyboard.append([
             InlineKeyboardButton(
-                text=f"{product.name} - {product.price} so'm",
+                text=f"{product.name} - {format_price(product.price)} so'm",
                 callback_data=f"user_product_{product.id}"
             )
         ])
@@ -235,7 +236,7 @@ async def view_user_product(callback: CallbackQuery):
     
     text = (
         f"📦 <b>{product.name}</b>\n\n"
-        f"💰 Narxi: {product.price} so'm\n"
+        f"💰 Narxi: {format_price(product.price)} so'm\n"
         f"📝 Tavsif: {product.description or 'Tavsif berilmagan'}\n\n"
         "Bu mahsulotni buyurtma qilish uchun savatga qo'shing!"
     )

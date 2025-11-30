@@ -20,6 +20,7 @@ from app.keyboards.inline import (
     get_confirm_delete_keyboard,
     get_cancel_keyboard
 )
+from app.utils.formatters import format_price
 
 router = Router()
 
@@ -83,7 +84,7 @@ async def view_product_detail(callback: CallbackQuery):
     
     text = (
         f"📦 <b>{product.name}</b>\n\n"
-        f"💰 Narxi: {product.price} so'm\n"
+        f"💰 Narxi: {format_price(product.price)} so'm\n"
         f"🏷 Turi: {product.type}\n"
         f"📝 Tavsif: {product.description or no_desc}\n"
         f"🖼 Rasm: {has_img if product.product_image else no_img}\n\n"
@@ -158,7 +159,7 @@ async def process_product_price(message: Message, state: FSMContext):
         )
         
         await message.answer(
-            f"✅ Narxi: <b>{price} so'm</b>\n\n"
+            f"✅ Narxi: <b>{format_price(price)} so'm</b>\n\n"
             "Endi mahsulot turini tanlang:",
             reply_markup=keyboard
         )
@@ -226,7 +227,7 @@ async def process_product_image(message: Message, state: FSMContext):
     text = (
         f"✅ <b>Mahsulot muvaffaqiyatli qo'shildi!</b>\n\n"
         f"📦 Nomi: {product.name}\n"
-        f"💰 Narxi: {product.price} so'm\n"
+        f"💰 Narxi: {format_price(product.price)} so'm\n"
         f"🏷 Turi: {product.type}\n"
         f"📝 Tavsif: {product.description or no_desc}"
     )
@@ -256,7 +257,7 @@ async def skip_product_image(message: Message, state: FSMContext):
     await message.answer(
         f"✅ <b>Mahsulot muvaffaqiyatli qo'shildi!</b>\n\n"
         f"📦 Nomi: {product.name}\n"
-        f"💰 Narxi: {product.price} so'm\n"
+        f"💰 Narxi: {format_price(product.price)} so'm\n"
         f"🏷 Turi: {product.type}\n"
         f"📝 Tavsif: {product.description or no_desc}",
         reply_markup=get_admin_panel_keyboard()
@@ -323,7 +324,7 @@ async def edit_product_menu(callback: CallbackQuery, state: FSMContext):
     
     text = (
         f"✏️ <b>Tahrirlanmoqda: {product.name}</b>\n\n"
-        f"Joriy narx: {product.price} so'm\n"
+        f"Joriy narx: {format_price(product.price)} so'm\n"
         f"Joriy tur: {product.type}\n"
         f"Joriy tavsif: {product.description or no_desc}\n"
         f"Joriy rasm: {has_img if product.product_image else no_img}\n\n"
@@ -413,7 +414,7 @@ async def process_edit_price(message: Message, state: FSMContext):
         
         await message.answer(
             f"✅ <b>Mahsulot narxi yangilandi!</b>\n\n"
-            f"Yangi narx: {product.price} so'm",
+            f"Yangi narx: {format_price(product.price)} so'm",
             reply_markup=get_admin_panel_keyboard()
         )
         await state.clear()
@@ -623,7 +624,7 @@ async def confirm_delete_product(callback: CallbackQuery):
         f"⚠️ <b>O'chirishni tasdiqlash</b>\n\n"
         f"Ushbu mahsulotni o'chirishni xohlaysizmi?\n\n"
         f"📦 Nomi: {product.name}\n"
-        f"💰 Narxi: {product.price} so'm"
+        f"💰 Narxi: {format_price(product.price)} so'm"
     )
     
     # Check if current message has photo (no text to edit)

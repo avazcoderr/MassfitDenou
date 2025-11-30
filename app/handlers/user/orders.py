@@ -7,6 +7,7 @@ from aiogram.fsm.state import State, StatesGroup
 from app.database.engine import async_session_maker
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
+from app.utils.formatters import format_price
 
 router = Router()
 
@@ -84,13 +85,13 @@ async def my_orders(message: Message):
             product = item.product
             item_total = float(product.price) * item.quantity
             total += item_total
-            items_text += f"• {product.name}\n  💰 {product.price} so'm x {item.quantity} = {item_total:.2f} so'm\n\n"
+            items_text += f"• {product.name}\n  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
         
         text = (
             f"🛒 <b>Mening savatim</b>\n\n"
             f"{items_text}"
             f"━━━━━━━━━━━━━━━\n"
-            f"💵 <b>Jami: {total:.2f} so'm</b>"
+            f"💵 <b>Jami: {format_price(total)} so'm</b>"
         )
         
         keyboard = []
@@ -130,13 +131,13 @@ async def basket_increase(callback: CallbackQuery):
             product = item.product
             item_total = float(product.price) * item.quantity
             total += item_total
-            items_text += f"• {product.name}\n  💰 {product.price} so'm x {item.quantity} = {item_total:.2f} so'm\n\n"
+            items_text += f"• {product.name}\n  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
         
         text = (
             f"🛒 <b>Mening savatim</b>\n\n"
             f"{items_text}"
             f"━━━━━━━━━━━━━━━\n"
-            f"💵 <b>Jami: {total:.2f} so'm</b>"
+            f"💵 <b>Jami: {format_price(total)} so'm</b>"
         )
         
         keyboard = []
@@ -187,13 +188,13 @@ async def basket_decrease(callback: CallbackQuery):
             product = item.product
             item_total = float(product.price) * item.quantity
             total += item_total
-            items_text += f"• {product.name}\n  💰 {product.price} so'm x {item.quantity} = {item_total:.2f} so'm\n\n"
+            items_text += f"• {product.name}\n  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
         
         text = (
             f"🛒 <b>Mening savatim</b>\n\n"
             f"{items_text}"
             f"━━━━━━━━━━━━━━━\n"
-            f"💵 <b>Jami: {total:.2f} so'm</b>"
+            f"💵 <b>Jami: {format_price(total)} so'm</b>"
         )
         
         keyboard = []
@@ -435,13 +436,13 @@ async def confirm_order_no(callback: CallbackQuery, state: FSMContext):
             product = item.product
             item_total = float(product.price) * item.quantity
             total += item_total
-            items_text += f"• {product.name}\n  💰 {product.price} so'm x {item.quantity} = {item_total:.2f} so'm\n\n"
+            items_text += f"• {product.name}\n  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
         
         text = (
             f"🛒 <b>Mening savatim</b>\n\n"
             f"{items_text}"
             f"━━━━━━━━━━━━━━━\n"
-            f"💵 <b>Jami: {total:.2f} so'm</b>"
+            f"💵 <b>Jami: {format_price(total)} so'm</b>"
         )
         
         keyboard = []
@@ -491,7 +492,7 @@ async def confirm_order_yes_delivery(callback: CallbackQuery, state: FSMContext)
             product = item.product
             item_total = float(product.price) * item.quantity
             total += item_total
-            items_text += f"• {product.name}\n  💰 {product.price} so'm x {item.quantity} = {item_total:.2f} so'm\n\n"
+            items_text += f"• {product.name}\n  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
         
         # Create order with delivery details
         order = await create_order(
@@ -536,7 +537,7 @@ async def confirm_order_yes_delivery(callback: CallbackQuery, state: FSMContext)
             f"📦 <b>Buyurtma mahsulotlari:</b>\n"
             f"{items_text}"
             f"━━━━━━━━━━━━━━━\n"
-            f"💵 <b>Jami: {total:.2f} so'm</b>\n"
+            f"💵 <b>Jami: {format_price(total)} so'm</b>\n"
             f"📊 Holati: {order.status}"
         )
         
@@ -581,7 +582,7 @@ async def confirm_order_yes_delivery(callback: CallbackQuery, state: FSMContext)
     await callback.message.edit_text(
         f"✅ <b>Buyurtma tasdiqlandi!</b>\n\n"
         f"Sizning buyurtmangiz #{order.id} muvaffaqiyatli joylashtirildi.\n"
-        f"Jami: {total:.2f} so'm\n"
+        f"Jami: {format_price(total)} so'm\n"
         f"Yetkazib berish turi: Yetkazib berish\n\n"
         f"Tez orada joylashuvingizga yetkazib beramiz!"
     )
@@ -624,7 +625,7 @@ async def confirm_order_yes_pickup(callback: CallbackQuery, state: FSMContext):
             product = item.product
             item_total = float(product.price) * item.quantity
             total += item_total
-            items_text += f"• {product.name}\n  💰 {product.price} so'm x {item.quantity} = {item_total:.2f} so'm\n\n"
+            items_text += f"• {product.name}\n  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
         
         # Create order with pickup details
         order = await create_order(
@@ -657,7 +658,7 @@ async def confirm_order_yes_pickup(callback: CallbackQuery, state: FSMContext):
             f"📦 <b>Buyurtma mahsulotlari:</b>\n"
             f"{items_text}"
             f"━━━━━━━━━━━━━━━\n"
-            f"💵 <b>Jami: {total:.2f} so'm</b>\n"
+            f"💵 <b>Jami: {format_price(total)} so'm</b>\n"
             f"📊 Holati: {order.status}"
         )
         
@@ -692,7 +693,7 @@ async def confirm_order_yes_pickup(callback: CallbackQuery, state: FSMContext):
         f"Mahsulotingiz haqida ma'lumot filialga yuborildi.\n"
         f"Ular tez orada siz bilan bog'lanishadi!\n\n"
         f"📦 Buyurtma #{order.id}\n"
-        f"💵 Jami: {total:.2f} so'm\n"
+        f"💵 Jami: {format_price(total)} so'm\n"
         f"🏢 Filial: {branch.name}"
     )
     await state.clear()
@@ -726,7 +727,7 @@ async def update_order_status_handler(callback: CallbackQuery):
         items_text = ""
         for item in order_items:
             item_total = float(item.product_price) * item.quantity
-            items_text += f"• {item.product_name}\n  💰 {item.product_price} so'm x {item.quantity} = {item_total:.2f} so'm\n\n"
+            items_text += f"• {item.product_name}\n  💰 {format_price(item.product_price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
         
         # Update group message with HTML parse mode
         group_text = (
@@ -737,7 +738,7 @@ async def update_order_status_handler(callback: CallbackQuery):
             f"📦 <b>Buyurtma mahsulotlari:</b>\n"
             f"{items_text}"
             f"━━━━━━━━━━━━━━━\n"
-            f"💵 <b>Jami: {order.total_price} so'm</b>\n"
+            f"💵 <b>Jami: {format_price(order.total_price)} so'm</b>\n"
             f"📊 Holati: <b>{new_status.upper()}</b>"
         )
         

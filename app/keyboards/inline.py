@@ -1,4 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from app.utils.formatters import format_price
 
 
 def get_admin_panel_keyboard():
@@ -20,7 +21,7 @@ def get_product_list_keyboard(products):
     for product in products:
         keyboard.append([
             InlineKeyboardButton(
-                text=f"{product.name} - {product.price} so'm", 
+                text=f"{product.name} - {format_price(product.price)} so'm", 
                 callback_data=f"product_view_{product.id}"
             )
         ])

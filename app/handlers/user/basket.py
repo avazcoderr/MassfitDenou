@@ -3,6 +3,7 @@ from aiogram.types import CallbackQuery
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from app.database.engine import async_session_maker
 from app.database.product_requests import get_product_by_id
+from app.utils.formatters import format_price
 
 router = Router()
 
@@ -23,9 +24,9 @@ async def add_to_basket_view(callback: CallbackQuery):
     
     text = (
         f"📦 <b>{product.name}</b>\n\n"
-        f"💰 Bir dona narxi: {product.price} so'm\n"
+        f"💰 Bir dona narxi: {format_price(product.price)} so'm\n"
         f"📊 Miqdori: {quantity}\n"
-        f"💵 Jami: {total_price:.2f} so'm\n\n"
+        f"💵 Jami: {format_price(total_price)} so'm\n\n"
         "Miqdorni sozlang va savatga saqlang:"
     )
     
@@ -71,9 +72,9 @@ async def increase_quantity(callback: CallbackQuery):
     
     text = (
         f"📦 <b>{product.name}</b>\n\n"
-        f"💰 Bir dona narxi: {product.price} so'm\n"
+        f"💰 Bir dona narxi: {format_price(product.price)} so'm\n"
         f"📊 Miqdori: {new_qty}\n"
-        f"💵 Jami: {total_price:.2f} so'm\n\n"
+        f"💵 Jami: {format_price(total_price)} so'm\n\n"
         "Miqdorni sozlang va savatga saqlang:"
     )
     
@@ -118,7 +119,7 @@ async def decrease_quantity(callback: CallbackQuery):
         # Return to initial state
         text = (
             f"📦 <b>{product.name}</b>\n\n"
-            f"💰 Narxi: {product.price} so'm\n"
+            f"💰 Narxi: {format_price(product.price)} so'm\n"
             f"📝 Tavsif: {product.description or 'Tavsif berilmagan'}\n\n"
             "Bu mahsulotni buyurtma qilish uchun savatga qo'shing!"
         )
@@ -134,9 +135,9 @@ async def decrease_quantity(callback: CallbackQuery):
         
         text = (
             f"📦 <b>{product.name}</b>\n\n"
-            f"💰 Bir dona narxi: {product.price} so'm\n"
+            f"💰 Bir dona narxi: {format_price(product.price)} so'm\n"
             f"📊 Miqdori: {new_qty}\n"
-            f"💵 Jami: {total_price:.2f} so'm\n\n"
+            f"💵 Jami: {format_price(total_price)} so'm\n\n"
             "Miqdorni sozlang va savatga saqlang:"
         )
         
@@ -187,7 +188,7 @@ async def save_to_basket(callback: CallbackQuery):
     # Return to product view
     text = (
         f"📦 <b>{product.name}</b>\n\n"
-        f"💰 Narxi: {product.price} so'm\n"
+        f"💰 Narxi: {format_price(product.price)} so'm\n"
         f"📝 Tavsif: {product.description or 'Tavsif berilmagan'}\n\n"
         "Bu mahsulotni buyurtma qilish uchun savatga qo'shing!"
     )
