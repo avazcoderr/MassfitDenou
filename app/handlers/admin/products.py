@@ -109,11 +109,18 @@ async def view_product_detail(callback: CallbackQuery):
 # ADD PRODUCT
 @router.callback_query(F.data == "admin_add_product")
 async def start_add_product(callback: CallbackQuery, state: FSMContext):
-    await callback.message.edit_text(
+    text = (
         "➕ <b>Yangi mahsulot qo'shish</b>\n\n"
-        "Iltimos, mahsulot nomini kiriting:",
-        reply_markup=get_cancel_keyboard()
+        "Iltimos, mahsulot nomini kiriting:"
     )
+    
+    # Check if current message has photo (no text to edit)
+    if callback.message.photo:
+        await callback.message.delete()
+        await callback.message.answer(text, reply_markup=get_cancel_keyboard())
+    else:
+        await callback.message.edit_text(text, reply_markup=get_cancel_keyboard())
+    
     await state.set_state(ProductStates.waiting_for_name)
     await callback.answer()
 
@@ -264,17 +271,25 @@ async def start_edit_product(callback: CallbackQuery):
         products = await get_all_products(session)
     
     if not products:
-        await callback.message.edit_text(
+        text = (
             "📦 Tahrirlash uchun mahsulotlar mavjud emas.\n"
-            "Avval mahsulotlar qo'shing!",
-            reply_markup=get_admin_panel_keyboard()
+            "Avval mahsulotlar qo'shing!"
         )
+        markup = get_admin_panel_keyboard()
     else:
-        await callback.message.edit_text(
+        text = (
             "✏️ <b>Mahsulotni tahrirlash</b>\n\n"
-            "Tahrirlash uchun mahsulotni tanlang:",
-            reply_markup=get_product_edit_keyboard(products)
+            "Tahrirlash uchun mahsulotni tanlang:"
         )
+        markup = get_product_edit_keyboard(products)
+    
+    # Check if current message has photo (no text to edit)
+    if callback.message.photo:
+        await callback.message.delete()
+        await callback.message.answer(text, reply_markup=markup)
+    else:
+        await callback.message.edit_text(text, reply_markup=markup)
+    
     await callback.answer()
 
 
@@ -329,11 +344,19 @@ async def edit_product_menu(callback: CallbackQuery, state: FSMContext):
 async def edit_name_start(callback: CallbackQuery, state: FSMContext):
     product_id = int(callback.data.split("_")[2])
     await state.update_data(product_id=product_id)
-    await callback.message.edit_text(
+    
+    text = (
         "✏️ <b>Mahsulot nomini tahrirlash</b>\n\n"
-        "Iltimos, yangi mahsulot nomini kiriting:",
-        reply_markup=get_cancel_keyboard()
+        "Iltimos, yangi mahsulot nomini kiriting:"
     )
+    
+    # Check if current message has photo (no text to edit)
+    if callback.message.photo:
+        await callback.message.delete()
+        await callback.message.answer(text, reply_markup=get_cancel_keyboard())
+    else:
+        await callback.message.edit_text(text, reply_markup=get_cancel_keyboard())
+    
     await state.set_state(ProductStates.editing_name)
     await callback.answer()
 
@@ -358,11 +381,19 @@ async def process_edit_name(message: Message, state: FSMContext):
 async def edit_price_start(callback: CallbackQuery, state: FSMContext):
     product_id = int(callback.data.split("_")[2])
     await state.update_data(product_id=product_id)
-    await callback.message.edit_text(
+    
+    text = (
         "✏️ <b>Mahsulot narxini tahrirlash</b>\n\n"
-        "Iltimos, yangi narxni kiriting (masalan, 10.99):",
-        reply_markup=get_cancel_keyboard()
+        "Iltimos, yangi narxni kiriting (masalan, 10.99):"
     )
+    
+    # Check if current message has photo (no text to edit)
+    if callback.message.photo:
+        await callback.message.delete()
+        await callback.message.answer(text, reply_markup=get_cancel_keyboard())
+    else:
+        await callback.message.edit_text(text, reply_markup=get_cancel_keyboard())
+    
     await state.set_state(ProductStates.editing_price)
     await callback.answer()
 
@@ -396,11 +427,19 @@ async def process_edit_price(message: Message, state: FSMContext):
 async def edit_description_start(callback: CallbackQuery, state: FSMContext):
     product_id = int(callback.data.split("_")[2])
     await state.update_data(product_id=product_id)
-    await callback.message.edit_text(
+    
+    text = (
         "✏️ <b>Mahsulot tavsifini tahrirlash</b>\n\n"
-        "Iltimos, yangi tavsifni kiriting:",
-        reply_markup=get_cancel_keyboard()
+        "Iltimos, yangi tavsifni kiriting:"
     )
+    
+    # Check if current message has photo (no text to edit)
+    if callback.message.photo:
+        await callback.message.delete()
+        await callback.message.answer(text, reply_markup=get_cancel_keyboard())
+    else:
+        await callback.message.edit_text(text, reply_markup=get_cancel_keyboard())
+    
     await state.set_state(ProductStates.editing_description)
     await callback.answer()
 
@@ -412,10 +451,10 @@ async def edit_type_start(callback: CallbackQuery, state: FSMContext):
     
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🌿 Vazn yo'qotish", callback_data=f"edittype_weight_loss_{product_id}")],
-            [InlineKeyboardButton(text="🐷 Vazn orttirish", callback_data=f"edittype_weight_gain_{product_id}")],
+            [InlineKeyboardButton(text="🔻 Vazn yo'qotish", callback_data=f"edittype_weight_loss_{product_id}")],
+            [InlineKeyboardButton(text="🔺 Vazn orttirish", callback_data=f"edittype_weight_gain_{product_id}")],
             [InlineKeyboardButton(text="🍳 Nonushta", callback_data=f"edittype_nonushta_{product_id}")],
-            [InlineKeyboardButton(text="🥤 Detox", callback_data=f"edittype_detox_{product_id}")],
+            [InlineKeyboardButton(text="🧪 Detox", callback_data=f"edittype_detox_{product_id}")],
             [InlineKeyboardButton(text="🍽 Tushliklar", callback_data=f"edittype_tushliklar_{product_id}")],
             [InlineKeyboardButton(text="🍓 FruitMix", callback_data=f"edittype_fruitmix_{product_id}")],
             [InlineKeyboardButton(text="🌙 Kechki ovqat", callback_data=f"edittype_kechki_ovqat_{product_id}")],
@@ -423,11 +462,18 @@ async def edit_type_start(callback: CallbackQuery, state: FSMContext):
         ]
     )
     
-    await callback.message.edit_text(
+    text = (
         "✏️ <b>Mahsulot turini tahrirlash</b>\n\n"
-        "Iltimos, yangi mahsulot turini tanlang:",
-        reply_markup=keyboard
+        "Iltimos, yangi mahsulot turini tanlang:"
     )
+    
+    # Check if current message has photo (no text to edit)
+    if callback.message.photo:
+        await callback.message.delete()
+        await callback.message.answer(text, reply_markup=keyboard)
+    else:
+        await callback.message.edit_text(text, reply_markup=keyboard)
+    
     await callback.answer()
 
 
@@ -483,11 +529,19 @@ async def process_edit_description(message: Message, state: FSMContext):
 async def edit_image_start(callback: CallbackQuery, state: FSMContext):
     product_id = int(callback.data.split("_")[2])
     await state.update_data(product_id=product_id)
-    await callback.message.edit_text(
+    
+    text = (
         "✏️ <b>Mahsulot rasmini tahrirlash</b>\n\n"
-        "Iltimos, yangi mahsulot rasmini yuboring (yoki rasmni o'chirish uchun /skip yuboring):",
-        reply_markup=get_cancel_keyboard()
+        "Iltimos, yangi mahsulot rasmini yuboring (yoki rasmni o'chirish uchun /skip yuboring):"
     )
+    
+    # Check if current message has photo (no text to edit)
+    if callback.message.photo:
+        await callback.message.delete()
+        await callback.message.answer(text, reply_markup=get_cancel_keyboard())
+    else:
+        await callback.message.edit_text(text, reply_markup=get_cancel_keyboard())
+    
     await state.set_state(ProductStates.editing_image)
     await callback.answer()
 
@@ -535,16 +589,22 @@ async def start_delete_product(callback: CallbackQuery):
         products = await get_all_products(session)
     
     if not products:
-        await callback.message.edit_text(
-            "📦 O'chirish uchun mahsulotlar mavjud emas.",
-            reply_markup=get_admin_panel_keyboard()
-        )
+        text = "📦 O'chirish uchun mahsulotlar mavjud emas."
+        markup = get_admin_panel_keyboard()
     else:
-        await callback.message.edit_text(
+        text = (
             "🗑 <b>Mahsulotni o'chirish</b>\n\n"
-            "⚠️ O'chirish uchun mahsulotni tanlang:",
-            reply_markup=get_product_delete_keyboard(products)
+            "⚠️ O'chirish uchun mahsulotni tanlang:"
         )
+        markup = get_product_delete_keyboard(products)
+    
+    # Check if current message has photo (no text to edit)
+    if callback.message.photo:
+        await callback.message.delete()
+        await callback.message.answer(text, reply_markup=markup)
+    else:
+        await callback.message.edit_text(text, reply_markup=markup)
+    
     await callback.answer()
 
 
