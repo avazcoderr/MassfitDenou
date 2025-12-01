@@ -32,3 +32,8 @@ async def update_user_phone(session: AsyncSession, tg_id: int, phone_number: str
         await session.commit()
         await session.refresh(user)
     return user
+
+
+async def get_all_users(session: AsyncSession) -> list[User]:
+    result = await session.execute(select(User))
+    return result.scalars().all()

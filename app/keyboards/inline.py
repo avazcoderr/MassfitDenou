@@ -11,6 +11,7 @@ def get_admin_panel_keyboard():
             [InlineKeyboardButton(text="✏️ Mahsulotni tahrirlash", callback_data="admin_edit_product")],
             [InlineKeyboardButton(text="🗑 Mahsulotni o'chirish", callback_data="admin_delete_product")],
             [InlineKeyboardButton(text="🏢 Filiallarni boshqarish", callback_data="admin_branches")],
+            [InlineKeyboardButton(text="📢 Barcha foydalanuvchilarga habar yuborish", callback_data="admin_broadcast")],
             [InlineKeyboardButton(text="🔙 Asosiy menyuga qaytish", callback_data="admin_back_main")]
         ]
     )
@@ -217,6 +218,18 @@ def get_confirm_delete_branch_keyboard(branch_id):
             [
                 InlineKeyboardButton(text="✅ Ha, o'chirish", callback_data=f"branch_confirm_delete_{branch_id}"),
                 InlineKeyboardButton(text="❌ Bekor qilish", callback_data="admin_view_branches")
+            ]
+        ]
+    )
+    return keyboard
+
+
+def get_broadcast_confirm_keyboard():
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="✅ Ha", callback_data="broadcast_confirm"),
+                InlineKeyboardButton(text="❌ Yo'q", callback_data="broadcast_cancel")
             ]
         ]
     )
