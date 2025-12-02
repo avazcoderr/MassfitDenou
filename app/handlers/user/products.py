@@ -187,8 +187,12 @@ async def lose_weight_menu(message: Message):
     
     await message.answer(
         "🌿 <b>Vazn yo'qotish mahsulotlari</b>\n\n"
-        "Bu toifadagi mahsulotlar tanangizning ortiqcha vaznini yo'qotishga yordam beradi.\n\n"
-        "Batafsil ma'lumot olish uchun mahsulotni tanlang:",
+        "Tanlab, mahsulot haqida <i>batafsil ma'lumot</i> oling:\n\n"
+        "• <b>Protein kokteyllar</b>  \n"
+        "• <b>Termogenik suplementlar</b>  \n"
+        "• <b>Dietik choylar</b>  \n"
+        "• <b>Kaloriya paketlari</b>\n\n"
+        "<i>Mahsulotga bosish → batafsil ma'lumot va narx ko‘rsatiladi.</i>",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard)
     )
 
@@ -217,8 +221,11 @@ async def gain_weight_menu(message: Message):
     
     await message.answer(
         "⚖️ <b>Vazn olish mahsulotlari</b>\n\n"
-        "Bu toifadagi mahsulotlar tanangizga sog'lom vazn va mushak massasini oshirishga yordam beradi.\n\n"
-        "Batafsil ma'lumot olish uchun mahsulotni tanlang:",
+        "Tanlab, mahsulot haqida <i>batafsil ma'lumot</i> oling:\n\n"
+        "• <b>Protein kokteyllar</b>  \n"
+        "• <b>Mass gain paketlari</b>  \n"
+        "• <b>Vitamin va minerallar</b>\n\n"
+        "<i>Mahsulotga bosish → batafsil ma'lumot va narx ko‘rsatiladi.</i>",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard)
     )
 

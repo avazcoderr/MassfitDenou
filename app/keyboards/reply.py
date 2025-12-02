@@ -23,3 +23,14 @@ def get_main_menu_keyboard():
         resize_keyboard=True
     )
     return keyboard
+
+
+def get_location_request_keyboard():
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="📍 Lokatsiyani jo'natish", request_location=True)]
+        ],
+        resize_keyboard=True,
+        one_time_keyboard=True
+    )
+    return keyboard

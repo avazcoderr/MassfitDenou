@@ -270,11 +270,19 @@ async def order_delivery_request_location(callback: CallbackQuery, state: FSMCon
 
 @router.callback_query(F.data == "delivery_location")
 async def request_location_coords(callback: CallbackQuery, state: FSMContext):
+    from app.keyboards.reply import get_location_request_keyboard
+    
     await callback.message.edit_text(
         "📍 <b>Joylashuvni yuborish</b>\n\n"
-        "Iltimos, yetkazib berish uchun joylashuvingizni yuboring.\n"
-        "Joylashuvingizni yuborish uchun 📎 qo'shimcha tugmasidan foydalaning."
+        "Iltimos, quyidagi tugmani bosing va joylashuvingizni yuboring."
     )
+    
+    # Send a new message with location request keyboard
+    await callback.message.answer(
+        "Iltimos, pastdagi tugmani bosing 👇",
+        reply_markup=get_location_request_keyboard()
+    )
+    
     await state.set_state(OrderStates.waiting_for_delivery_location)
     await callback.answer()
 
@@ -335,6 +343,8 @@ async def process_text_address(message: Message, state: FSMContext):
 
 @router.message(OrderStates.waiting_for_delivery_location, F.location)
 async def process_delivery_location(message: Message, state: FSMContext):
+    from app.keyboards.reply import get_main_menu_keyboard
+    
     latitude = message.location.latitude
     longitude = message.location.longitude
     
@@ -357,11 +367,29 @@ async def process_delivery_location(message: Message, state: FSMContext):
         ]
     )
     
+    # Return to main menu keyboard after location is sent
+    await message.answer(
+        "❓ Buyurtmangizni tasdiqlaysizmi?",
+        reply_markup=get_main_menu_keyboard()
+    )
+    
     await message.answer(
         f"📍 <b>Joylashuv qabul qilindi</b>\n\n"
         f"🏠 Manzil: {address}\n\n"
-        f"❓ Buyurtmangizni tasdiqlaysizmi?",
         reply_markup=keyboard
+    )
+
+
+@router.message(OrderStates.waiting_for_delivery_location)
+async def handle_invalid_location_input(message: Message):
+    """Handle non-location messages when waiting for location"""
+    from app.keyboards.reply import get_location_request_keyboard
+    
+    await message.answer(
+        "❌ <b>Noto'g'ri ma'lumot!</b>\n\n"
+        "Iltimos, joylashuvingizni yuboring. "
+        "Pastdagi tugmani bosing:",
+        reply_markup=get_location_request_keyboard()
     )
 
 
@@ -610,11 +638,12 @@ async def confirm_order_yes_delivery(callback: CallbackQuery, state: FSMContext)
         await clear_basket(session, user.id)
     
     await callback.message.edit_text(
-        f"✅ <b>Buyurtma tasdiqlandi!</b>\n\n"
-        f"Sizning buyurtmangiz #{order.id} muvaffaqiyatli joylashtirildi.\n"
-        f"Jami: {format_price(total)} so'm\n"
-        f"Yetkazib berish turi: Yetkazib berish\n\n"
-        f"Tez orada joylashuvingizga yetkazib beramiz!"
+        f"✅ <b>Buyurtma muvaffaqiyatli qabul qilindi!</b>\n\n"
+        f"📦 <b>Buyurtma raqami:</b> #{order.id}\n"
+        f"💰 <b>Jami:</b> {format_price(total)} so'm\n"
+        f"🚚 <b>Yetkazib berish:</b> Uy manzilingizga yetkazib berish\n\n"
+        f"Tez orada buyurtmangizni yetkazib beramiz.\n"
+        f"🤝 Biz bilan xarid qilganingiz uchun rahmat!"
     )
     await state.clear()
     await callback.answer()

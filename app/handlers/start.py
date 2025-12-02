@@ -136,18 +136,21 @@ async def process_contact(message: Message, state: FSMContext):
 
 async def show_main_menu(message: Message):
     bot_description = (
-        "🥗 <b>MassFit - Shaxsiy ovqatlanish yordamchingizga xush kelibsiz!</b>\n\n"
-        "Biz sizga to'g'ri ovqatlanish orqali salomatlik va fitnes maqsadlaringizga erishishda yordam beramiz. "
-        "Bizning bot sizning ehtiyojlaringizga moslashtirilgan shaxsiy ovqatlanish rejalari va professional tavsiyalarni taqdim etadi.\n\n"
-        "✨ <b>Biz taklif qilamiz:</b>\n"
-        "• Vazn yo'qotish yoki mushak massasini oshirish uchun maxsus ovqatlanish rejalari\n"
-        "• Muvozanatli ovqatlanish bo'yicha tavsiyalar\n"
-        "• Sog'lom retseptlar va ovqatlanish g'oyalari\n"
-        "• Professional parhez bo'yicha yo'riqnoma\n"
-        "• Buyurtmalaringiz va taraqqiyotingizni kuzatish\n\n"
-        "Boshlash uchun maqsadingizni tanlang! 👇"
+        "<b>🌿 MassFit - <u>Shaxsiy ovqatlanish yordamchingizga</u> xush kelibsiz!</b>\n\n"
+        "Biz sizga to'g'ri ovqatlanish orqali sog'lom turmush tarzi va fitness maqsadlaringizga erishishda yordam beramiz. "
+        "Bizning bot sizning ehtiyojlaringizga moslashtirilgan shaxsiy ovqatlanish rejalarini "
+        "va professional tavsiyalarni taqdim etadi.\n\n"
+        "<b>✨ <u>Biz taklif qilamiz:</u></b>\n"
+        "• 🍽 <b>Vazn yo'qotish</b> yoki <b>mushak massasini oshirish</b> uchun maxsus ovqatlanish rejalar  \n"
+        "• 🥦 Muvozanatli ovqatlanish bo'yicha tavsiyalar  \n"
+        "• 🥗 <u>Sog'lom retseptlar</u> va ovqatlanish g'oyalari  \n"
+        "• 📋 Professional parhez bo'yicha <u>yo'riqnoma</u>  \n\n"
+        "<b>👇 <u>Boshlash uchun maqsadingizni tanlang!</u></b>\n\n"
+        "<hr>\n\n"
+        "<b>🔒 Sifat kafolati:</b>  \n"
+        "<u>MassFit mahsulotlari sifati — JasurBarber tomonidan to'liq kafolatlanadi.</u>  \n"
+        "💯 Halol, organik va sinovdan o'tgan mahsulotlar!"
     )
-    
     await message.answer(
         bot_description,
         parse_mode="HTML",
