@@ -85,7 +85,13 @@ async def my_orders(message: Message):
             product = item.product
             item_total = float(product.price) * item.quantity
             total += item_total
-            items_text += f"• {product.name}\n  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
+
+            description = product.description if hasattr(product, "description") and product.description else ""
+            items_text += (
+                f"• {product.name}\n"
+                f"  📝 {description}\n"
+                f"  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
+            )
         
         text = (
             f"🛒 <b>Mening savatim</b>\n\n"
@@ -98,7 +104,7 @@ async def my_orders(message: Message):
         for item in basket_items:
             keyboard.append([
                 InlineKeyboardButton(text="➖", callback_data=f"basket_dec_{item.product_id}_{item.quantity}"),
-                InlineKeyboardButton(text=f"{item.product.name}: {item.quantity}", callback_data="basket_display"),
+                InlineKeyboardButton(text=f"{item.quantity}", callback_data="basket_display"),
                 InlineKeyboardButton(text="➕", callback_data=f"basket_inc_{item.product_id}_{item.quantity}")
             ])
         
@@ -131,7 +137,13 @@ async def basket_increase(callback: CallbackQuery):
             product = item.product
             item_total = float(product.price) * item.quantity
             total += item_total
-            items_text += f"• {product.name}\n  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
+
+            description = product.description if hasattr(product, "description") and product.description else ""
+            items_text += (
+                f"• {product.name}\n"
+                f"  📝 {description}\n"
+                f"  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
+            )
         
         text = (
             f"🛒 <b>Mening savatim</b>\n\n"
@@ -144,7 +156,7 @@ async def basket_increase(callback: CallbackQuery):
         for item in basket_items:
             keyboard.append([
                 InlineKeyboardButton(text="➖", callback_data=f"basket_dec_{item.product_id}_{item.quantity}"),
-                InlineKeyboardButton(text=f"{item.product.name}: {item.quantity}", callback_data="basket_display"),
+                InlineKeyboardButton(text=f"{item.quantity}", callback_data="basket_display"),
                 InlineKeyboardButton(text="➕", callback_data=f"basket_inc_{item.product_id}_{item.quantity}")
             ])
         
@@ -188,7 +200,13 @@ async def basket_decrease(callback: CallbackQuery):
             product = item.product
             item_total = float(product.price) * item.quantity
             total += item_total
-            items_text += f"• {product.name}\n  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
+
+            description = product.description if hasattr(product, "description") and product.description else ""
+            items_text += (
+                f"• {product.name}\n"
+                f"  📝 {description}\n"
+                f"  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
+            )
         
         text = (
             f"🛒 <b>Mening savatim</b>\n\n"
@@ -201,7 +219,7 @@ async def basket_decrease(callback: CallbackQuery):
         for item in basket_items:
             keyboard.append([
                 InlineKeyboardButton(text="➖", callback_data=f"basket_dec_{item.product_id}_{item.quantity}"),
-                InlineKeyboardButton(text=f"{item.product.name}: {item.quantity}", callback_data="basket_display"),
+                InlineKeyboardButton(text=f"{item.quantity}", callback_data="basket_display"),
                 InlineKeyboardButton(text="➕", callback_data=f"basket_inc_{item.product_id}_{item.quantity}")
             ])
         
@@ -436,7 +454,13 @@ async def confirm_order_no(callback: CallbackQuery, state: FSMContext):
             product = item.product
             item_total = float(product.price) * item.quantity
             total += item_total
-            items_text += f"• {product.name}\n  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
+
+            description = product.description if hasattr(product, "description") and product.description else ""
+            items_text += (
+                f"• {product.name}\n"
+                f"  📝 {description}\n"
+                f"  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
+            )
         
         text = (
             f"🛒 <b>Mening savatim</b>\n\n"
@@ -449,7 +473,7 @@ async def confirm_order_no(callback: CallbackQuery, state: FSMContext):
         for item in basket_items:
             keyboard.append([
                 InlineKeyboardButton(text="➖", callback_data=f"basket_dec_{item.product_id}_{item.quantity}"),
-                InlineKeyboardButton(text=f"{item.product.name}: {item.quantity}", callback_data="basket_display"),
+                InlineKeyboardButton(text=f"{item.quantity}", callback_data="basket_display"),
                 InlineKeyboardButton(text="➕", callback_data=f"basket_inc_{item.product_id}_{item.quantity}")
             ])
         
@@ -492,7 +516,13 @@ async def confirm_order_yes_delivery(callback: CallbackQuery, state: FSMContext)
             product = item.product
             item_total = float(product.price) * item.quantity
             total += item_total
-            items_text += f"• {product.name}\n  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
+
+            description = product.description if hasattr(product, "description") and product.description else ""
+            items_text += (
+                f"• {product.name}\n"
+                f"  📝 {description}\n"
+                f"  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
+            )
         
         # Create order with delivery details
         order = await create_order(
@@ -625,7 +655,13 @@ async def confirm_order_yes_pickup(callback: CallbackQuery, state: FSMContext):
             product = item.product
             item_total = float(product.price) * item.quantity
             total += item_total
-            items_text += f"• {product.name}\n  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
+
+            description = product.description if hasattr(product, "description") and product.description else ""
+            items_text += (
+                f"• {product.name}\n"
+                f"  📝 {description}\n"
+                f"  💰 {format_price(product.price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
+            )
         
         # Create order with pickup details
         order = await create_order(
