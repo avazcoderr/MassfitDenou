@@ -372,14 +372,14 @@ async def process_delivery_location(message: Message, state: FSMContext):
         "❓ Buyurtmangizni tasdiqlaysizmi?",
         reply_markup=get_main_menu_keyboard()
     )
-    
+
     await message.answer(
         f"📍 <b>Joylashuv qabul qilindi</b>\n\n"
-        f"🏠 Manzil: {address}\n\n"
+        f"🏠 Manzil: {address}\n\n",
         reply_markup=keyboard
     )
-
-
+    
+    
 @router.message(OrderStates.waiting_for_delivery_location)
 async def handle_invalid_location_input(message: Message):
     """Handle non-location messages when waiting for location"""
