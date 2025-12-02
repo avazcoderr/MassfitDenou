@@ -7,7 +7,7 @@ from app.database.engine import async_session_maker
 from app.database.requests import get_user_by_tg_id, create_user, update_user_phone
 from app.keyboards.reply import get_phone_keyboard, get_main_menu_keyboard
 from app.keyboards.inline import get_admin_panel_keyboard
-from app.config import ADMIN_ID
+from app.config import is_admin
 import re
 
 router = Router()
@@ -41,7 +41,7 @@ def format_uzbekistan_phone(phone: str) -> str:
 @router.message(Command('start'))
 async def cmd_start(message: Message):
     # Check if user is admin
-    if str(message.from_user.id) == str(ADMIN_ID):
+    if is_admin(message.from_user.id):
         await message.answer(
             "🔐 <b>Admin Panelga xush kelibsiz</b>\n\n"
             "Bu yerda siz mahsulotlarni boshqarishingiz va statistikani ko'rishingiz mumkin.\n"

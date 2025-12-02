@@ -3,14 +3,14 @@ from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from app.keyboards.inline import get_admin_panel_keyboard
-from app.config import ADMIN_ID
+from app.config import is_admin
 
 router = Router()
 
 
 @router.message(Command('admin'))
 async def cmd_admin(message: Message):
-    if str(message.from_user.id) != str(ADMIN_ID):
+    if not is_admin(message.from_user.id):
         await message.answer("⛔️ Sizda admin panelga kirish huquqi yo'q.")
         return
     

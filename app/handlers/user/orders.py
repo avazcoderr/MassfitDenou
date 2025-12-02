@@ -729,44 +729,57 @@ async def update_order_status_handler(callback: CallbackQuery):
             item_total = float(item.product_price) * item.quantity
             items_text += f"• {item.product_name}\n  💰 {format_price(item.product_price)} so'm x {item.quantity} = {format_price(item_total)} so'm\n\n"
         
-        # Update group message with HTML parse mode
-        group_text = (
-            f"🆕 <b>Yangi Buyurtma #{order.id}</b>\n\n"
+        # Get delivery information
+        delivery_info = ""
+        if order.delivery_type == 'delivery':
+            delivery_info = f"🚚 Yetkazib berish turi: <b>Yetkazib berish</b>\n"
+            if order.delivery_address:
+                delivery_info += f"🏠 Manzil: {order.delivery_address}\n"
+            elif order.delivery_latitude and order.delivery_longitude:
+                delivery_info += f"📍 Joylashuv koordinatalari yuborilgan\n"
+        elif order.delivery_type == 'pickup' and order.branch:
+            delivery_info = f"🏢 Olib ketish filiali: <b>{order.branch.name}</b>\n📍 Filial manzili: {order.branch.location}\n"
+        
+        # Create status message
+        status_emoji = "✅" if new_status == "delivered" else "❌"
+        status_text = "YETKAZILDI" if new_status == "delivered" else "BEKOR QILINDI"
+        
+        # Update group message - remove buttons and update text
+        updated_group_text = (
+            f"🆕 <b>Buyurtma #{order.id}</b>\n\n"
             f"👤 Mijoz: {user.full_name or user.first_name}\n"
             f"📱 Telefon: {user.phone_number or 'Berilmagan'}\n"
-            f"🆔 Foydalanuvchi ID: {user.tg_id}\n\n"
+            f"🆔 Foydalanuvchi ID: {user.tg_id}\n"
+            f"{delivery_info}\n"
             f"📦 <b>Buyurtma mahsulotlari:</b>\n"
             f"{items_text}"
             f"━━━━━━━━━━━━━━━\n"
             f"💵 <b>Jami: {format_price(order.total_price)} so'm</b>\n"
-            f"📊 Holati: <b>{new_status.upper()}</b>"
-        )
-        
-        group_keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    InlineKeyboardButton(text="❌ Bekor qilish", callback_data=f"order_status_{order.id}_cancelled"),
-                    InlineKeyboardButton(text="✅ Yetkazildi", callback_data=f"order_status_{order.id}_delivered")
-                ]
-            ]
+            f"📊 Holati: <b>{status_emoji} {status_text}</b>"
         )
         
         try:
-            await callback.message.edit_text(group_text, reply_markup=group_keyboard, parse_mode=ParseMode.HTML)
-        except:
-            pass
+            # Edit message without reply markup to remove buttons
+            await callback.message.edit_text(
+                updated_group_text, 
+                reply_markup=None, 
+                parse_mode=ParseMode.HTML
+            )
+        except Exception as e:
+            print(f"Error editing group message: {e}")
         
         # Notify user with HTML parse mode
         try:
-            status_emoji = "❌" if new_status == "cancelled" else "✅"
+            user_status_emoji = "✅" if new_status == "delivered" else "❌"
             await bot.send_message(
                 chat_id=user.tg_id,
-                text=f"{status_emoji} <b>Buyurtma #{order.id} holati yangilandi</b>\n\n"
-                     f"Buyurtma holati yangilandi: <b>{new_status.upper()}</b>",
+                text=f"{user_status_emoji} <b>Buyurtma #{order.id} holati yangilandi</b>\n\n"
+                     f"Buyurtma holati yangilandi: <b>{status_text}</b>",
                 parse_mode=ParseMode.HTML
             )
         except Exception as e:
             print(f"Error notifying user: {e}")
     
-    await callback.answer(f"Buyurtma holati yangilandi: {new_status}!")
+    # Show alert notification to admin
+    await callback.answer(f"Buyurtma holati yangilandi: {status_text}!", show_alert=True)
     await bot.session.close()

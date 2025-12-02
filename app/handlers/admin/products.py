@@ -21,6 +21,7 @@ from app.keyboards.inline import (
     get_cancel_keyboard
 )
 from app.utils.formatters import format_price
+from app.config import is_admin
 
 router = Router()
 
@@ -40,6 +41,9 @@ class ProductStates(StatesGroup):
 
 @router.callback_query(F.data == "admin_view_products")
 async def view_all_products(callback: CallbackQuery):
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔️ Sizda bu amalni bajarish huquqi yo'q.", show_alert=True)
+        return
     await view_products_page(callback, 0)
 
 

@@ -11,6 +11,11 @@ def get_admin_panel_keyboard():
             [InlineKeyboardButton(text="✏️ Mahsulotni tahrirlash", callback_data="admin_edit_product")],
             [InlineKeyboardButton(text="🗑 Mahsulotni o'chirish", callback_data="admin_delete_product")],
             [InlineKeyboardButton(text="🏢 Filiallarni boshqarish", callback_data="admin_branches")],
+            [
+                InlineKeyboardButton(text="👥 User statistikasi", callback_data="user_stats"),
+                InlineKeyboardButton(text="💰 Daromad statistikasi", callback_data="revenue_stats")
+            ],
+            [InlineKeyboardButton(text="❌ Bekor qilingan Buyurtmalar", callback_data="cancelled_orders_stats")],
             [InlineKeyboardButton(text="📢 Barcha foydalanuvchilarga habar yuborish", callback_data="admin_broadcast")],
             [InlineKeyboardButton(text="🔙 Asosiy menyuga qaytish", callback_data="admin_back_main")]
         ]
@@ -231,6 +236,42 @@ def get_broadcast_confirm_keyboard():
                 InlineKeyboardButton(text="✅ Ha", callback_data="broadcast_confirm"),
                 InlineKeyboardButton(text="❌ Yo'q", callback_data="broadcast_cancel")
             ]
+        ]
+    )
+    return keyboard
+
+
+def get_user_stats_keyboard():
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="👥 Barcha Userlar", callback_data="all_users_stats")],
+            [InlineKeyboardButton(text="📅 Haftalik Userlar statistikasi", callback_data="weekly_users_stats")],
+            [InlineKeyboardButton(text="📆 Oylik Userlar statistikasi", callback_data="monthly_users_stats")],
+            [InlineKeyboardButton(text="🔙 Admin panelga qaytish", callback_data="admin_panel")]
+        ]
+    )
+    return keyboard
+
+
+def get_revenue_stats_keyboard():
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="📅 1 kunlik daromad", callback_data="daily_revenue_stats")],
+            [InlineKeyboardButton(text="📊 1 haftalik daromad", callback_data="weekly_revenue_stats")],
+            [InlineKeyboardButton(text="📈 1 oylik daromad", callback_data="monthly_revenue_stats")],
+            [InlineKeyboardButton(text="🔙 Admin panelga qaytish", callback_data="admin_panel")]
+        ]
+    )
+    return keyboard
+
+
+def get_cancelled_orders_stats_keyboard():
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="📅 1 kunlik", callback_data="daily_cancelled_stats")],
+            [InlineKeyboardButton(text="📊 1 haftalik", callback_data="weekly_cancelled_stats")],
+            [InlineKeyboardButton(text="📈 1 oylik", callback_data="monthly_cancelled_stats")],
+            [InlineKeyboardButton(text="🔙 Admin panelga qaytish", callback_data="admin_panel")]
         ]
     )
     return keyboard
