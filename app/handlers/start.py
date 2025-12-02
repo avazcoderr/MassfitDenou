@@ -146,7 +146,7 @@ async def show_main_menu(message: Message):
         "• 🥗 <u>Sog'lom retseptlar</u> va ovqatlanish g'oyalari  \n"
         "• 📋 Professional parhez bo'yicha <u>yo'riqnoma</u>  \n\n"
         "<b>👇 <u>Boshlash uchun maqsadingizni tanlang!</u></b>\n\n"
-        "<hr>\n\n"
+        "━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
         "<b>🔒 Sifat kafolati:</b>  \n"
         "<u>MassFit mahsulotlari sifati — JasurBarber tomonidan to'liq kafolatlanadi.</u>  \n"
         "💯 Halol, organik va sinovdan o'tgan mahsulotlar!"
