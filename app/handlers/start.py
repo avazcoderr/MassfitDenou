@@ -8,7 +8,7 @@ from app.database.engine import async_session_maker
 from app.database.requests import get_user_by_tg_id, create_user, update_user_phone
 from app.keyboards.reply import get_phone_keyboard, get_main_menu_keyboard
 from app.keyboards.inline import get_admin_panel_keyboard
-from app.config import is_admin, CHANNEL_ID, ENABLE_SUBSCRIPTION_CHECK
+from app.config import is_admin, CHANNEL_ID, CHANNEL_USERNAME, CHANNEL_URL, ENABLE_SUBSCRIPTION_CHECK
 import re
 import logging
 
@@ -45,14 +45,23 @@ async def check_subscription(bot, user_id: int) -> bool:
     if not ENABLE_SUBSCRIPTION_CHECK:
         return True  # Subscription checking is disabled
         
-    if not CHANNEL_ID:
-        return True  # If no channel ID is set, allow access
+    # Determine which identifier to use for subscription check
+    channel_identifier = None
+    if CHANNEL_USERNAME:
+        # Use username (with or without @)
+        channel_identifier = CHANNEL_USERNAME if CHANNEL_USERNAME.startswith('@') else f"@{CHANNEL_USERNAME}"
+    elif CHANNEL_ID:
+        # Fall back to ID if username is not provided
+        channel_identifier = CHANNEL_ID
+    
+    if not channel_identifier:
+        return True  # If no channel identifier is set, allow access
     
     try:
-        chat_member = await bot.get_chat_member(CHANNEL_ID, user_id)
+        chat_member = await bot.get_chat_member(channel_identifier, user_id)
         return chat_member.status in ['creator', 'administrator', 'member']
     except TelegramAPIError as e:
-        logging.error(f"Error checking subscription for user {user_id}: {e}")
+        logging.error(f"Error checking subscription for user {user_id} with channel {channel_identifier}: {e}")
         # Return False to enforce subscription when there's an error
         # This ensures users must subscribe even if we can't verify
         return False
@@ -60,14 +69,24 @@ async def check_subscription(bot, user_id: int) -> bool:
 
 def get_subscription_keyboard():
     """Get keyboard for subscription request"""
-    # For channel IDs starting with -100, we need to construct the URL differently
-    if CHANNEL_ID and CHANNEL_ID.startswith('-100'):
-        # Remove -100 prefix to get the actual channel identifier
+    # Determine the channel URL to use
+    if CHANNEL_URL:
+        # Use the full URL if provided
+        channel_url = CHANNEL_URL
+    elif CHANNEL_USERNAME:
+        # Construct URL from username
+        username = CHANNEL_USERNAME.lstrip('@')
+        channel_url = f"https://t.me/{username}"
+    elif CHANNEL_ID and CHANNEL_ID.startswith('-100'):
+        # For channel IDs starting with -100, construct the URL differently
         channel_identifier = CHANNEL_ID[4:]
         channel_url = f"https://t.me/c/{channel_identifier}"
-    else:
+    elif CHANNEL_ID:
         # If it's a username or different format
-        channel_url = f"https://t.me/{CHANNEL_ID.lstrip('@')}" if CHANNEL_ID else "https://t.me/"
+        channel_url = f"https://t.me/{CHANNEL_ID.lstrip('@')}"
+    else:
+        # Default fallback
+        channel_url = "https://t.me/"
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📢 Kanalga obuna bo'lish", url=channel_url)],
