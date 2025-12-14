@@ -8,7 +8,7 @@ from app.database.engine import async_session_maker
 from app.database.requests import get_user_by_tg_id, create_user, update_user_phone
 from app.keyboards.reply import get_phone_keyboard, get_main_menu_keyboard
 from app.keyboards.inline import get_admin_panel_keyboard
-from app.config import is_admin, CHANNEL_ID
+from app.config import is_admin, CHANNEL_ID, ENABLE_SUBSCRIPTION_CHECK
 import re
 import logging
 
@@ -42,6 +42,9 @@ def format_uzbekistan_phone(phone: str) -> str:
 
 async def check_subscription(bot, user_id: int) -> bool:
     """Check if user is subscribed to the channel"""
+    if not ENABLE_SUBSCRIPTION_CHECK:
+        return True  # Subscription checking is disabled
+        
     if not CHANNEL_ID:
         return True  # If no channel ID is set, allow access
     
@@ -50,7 +53,9 @@ async def check_subscription(bot, user_id: int) -> bool:
         return chat_member.status in ['creator', 'administrator', 'member']
     except TelegramAPIError as e:
         logging.error(f"Error checking subscription for user {user_id}: {e}")
-        return True  # Allow access on API error to avoid blocking users
+        # Return False to enforce subscription when there's an error
+        # This ensures users must subscribe even if we can't verify
+        return False
 
 
 def get_subscription_keyboard():
@@ -134,6 +139,20 @@ async def cmd_start(message: Message):
 
 @router.message(F.text == "✍️ Telefon raqamni yozish")
 async def request_manual_phone(message: Message, state: FSMContext):
+    # Check subscription before allowing manual phone input
+    if not is_admin(message.from_user.id):
+        bot = message.bot
+        is_subscribed = await check_subscription(bot, message.from_user.id)
+        
+        if not is_subscribed:
+            await message.answer(
+                "🔒 <b>Botdan foydalanish uchun kanalga obuna bo'ling!</b>\n\n"
+                "Bizning kanalimizga obuna bo'lib, botning barcha imkoniyatlaridan foydalaning.\n\n"
+                "Obuna bo'lgandan keyin \"✅ Tekshirish\" tugmasini bosing.",
+                reply_markup=get_subscription_keyboard()
+            )
+            return
+    
     await message.answer(
         "✍️ <b>Telefon raqamini kiriting</b>\n\n"
         "Iltimos, telefon raqamingizni +998 XX XXX XXXX formatida kiriting.\n\n"
@@ -145,6 +164,21 @@ async def request_manual_phone(message: Message, state: FSMContext):
 
 @router.message(PhoneStates.waiting_for_phone)
 async def process_manual_phone(message: Message, state: FSMContext):
+    # Check subscription before processing manual phone
+    if not is_admin(message.from_user.id):
+        bot = message.bot
+        is_subscribed = await check_subscription(bot, message.from_user.id)
+        
+        if not is_subscribed:
+            await message.answer(
+                "🔒 <b>Botdan foydalanish uchun kanalga obuna bo'ling!</b>\n\n"
+                "Bizning kanalimizga obuna bo'lib, botning barcha imkoniyatlaridan foydalaning.\n\n"
+                "Obuna bo'lgandan keyin \"✅ Tekshirish\" tugmasini bosing.",
+                reply_markup=get_subscription_keyboard()
+            )
+            await state.clear()
+            return
+    
     phone = message.text.strip()
     
     if not validate_uzbekistan_phone(phone):
@@ -167,6 +201,20 @@ async def process_manual_phone(message: Message, state: FSMContext):
 
 @router.message(F.contact)
 async def process_contact(message: Message, state: FSMContext):
+    # Check subscription before processing contact
+    if not is_admin(message.from_user.id):
+        bot = message.bot
+        is_subscribed = await check_subscription(bot, message.from_user.id)
+        
+        if not is_subscribed:
+            await message.answer(
+                "🔒 <b>Botdan foydalanish uchun kanalga obuna bo'ling!</b>\n\n"
+                "Bizning kanalimizga obuna bo'lib, botning barcha imkoniyatlaridan foydalaning.\n\n"
+                "Obuna bo'lgandan keyin \"✅ Tekshirish\" tugmasini bosing.",
+                reply_markup=get_subscription_keyboard()
+            )
+            return
+    
     phone_number = message.contact.phone_number
     
     # Format the phone number if it's valid
