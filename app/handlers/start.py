@@ -1,14 +1,16 @@
 from aiogram import Router, F
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+from aiogram.exceptions import TelegramAPIError
 from app.database.engine import async_session_maker
 from app.database.requests import get_user_by_tg_id, create_user, update_user_phone
 from app.keyboards.reply import get_phone_keyboard, get_main_menu_keyboard
 from app.keyboards.inline import get_admin_panel_keyboard
-from app.config import is_admin
+from app.config import is_admin, CHANNEL_ID
 import re
+import logging
 
 router = Router()
 
@@ -38,6 +40,37 @@ def format_uzbekistan_phone(phone: str) -> str:
     return phone
 
 
+async def check_subscription(bot, user_id: int) -> bool:
+    """Check if user is subscribed to the channel"""
+    if not CHANNEL_ID:
+        return True  # If no channel ID is set, allow access
+    
+    try:
+        chat_member = await bot.get_chat_member(CHANNEL_ID, user_id)
+        return chat_member.status in ['creator', 'administrator', 'member']
+    except TelegramAPIError as e:
+        logging.error(f"Error checking subscription for user {user_id}: {e}")
+        return True  # Allow access on API error to avoid blocking users
+
+
+def get_subscription_keyboard():
+    """Get keyboard for subscription request"""
+    # For channel IDs starting with -100, we need to construct the URL differently
+    if CHANNEL_ID and CHANNEL_ID.startswith('-100'):
+        # Remove -100 prefix to get the actual channel identifier
+        channel_identifier = CHANNEL_ID[4:]
+        channel_url = f"https://t.me/c/{channel_identifier}"
+    else:
+        # If it's a username or different format
+        channel_url = f"https://t.me/{CHANNEL_ID.lstrip('@')}" if CHANNEL_ID else "https://t.me/"
+    
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📢 Kanalga obuna bo'lish", url=channel_url)],
+        [InlineKeyboardButton(text="✅ Tekshirish", callback_data="check_subscription")]
+    ])
+    return keyboard
+
+
 @router.message(Command('start'))
 async def cmd_start(message: Message):
     # Check if user is admin
@@ -47,6 +80,19 @@ async def cmd_start(message: Message):
             "Bu yerda siz mahsulotlarni boshqarishingiz va statistikani ko'rishingiz mumkin.\n"
             "Quyidagi variantlardan birini tanlang:",
             reply_markup=get_admin_panel_keyboard()
+        )
+        return
+    
+    # Check subscription for regular users
+    bot = message.bot
+    is_subscribed = await check_subscription(bot, message.from_user.id)
+    
+    if not is_subscribed:
+        await message.answer(
+            "🔒 <b>Botdan foydalanish uchun kanalga obuna bo'ling!</b>\n\n"
+            "Bizning kanalimizga obuna bo'lib, botning barcha imkoniyatlaridan foydalaning.\n\n"
+            "Obuna bo'lgandan keyin \"✅ Tekshirish\" tugmasini bosing.",
+            reply_markup=get_subscription_keyboard()
         )
         return
     
@@ -156,3 +202,56 @@ async def show_main_menu(message: Message):
         parse_mode="HTML",
         reply_markup=get_main_menu_keyboard()
     )
+
+
+@router.callback_query(F.data == "check_subscription")
+async def check_subscription_callback(callback: CallbackQuery):
+    """Handle subscription check callback"""
+    bot = callback.bot
+    is_subscribed = await check_subscription(bot, callback.from_user.id)
+    
+    if not is_subscribed:
+        await callback.answer(
+            "❌ Siz hali kanalga obuna bo'lmagan ekansiz. Iltimos, avval kanalga obuna bo'ling!",
+            show_alert=True
+        )
+        return
+    
+    await callback.answer("✅ Tabriklaymiz! Siz kanalga obuna bo'ldingiz.", show_alert=True)
+    await callback.message.delete()
+    
+    # Now proceed with the normal start flow
+    async with async_session_maker() as session:
+        user = await get_user_by_tg_id(session, callback.from_user.id)
+        
+        if not user:
+            # Create new user
+            full_name = f"{callback.from_user.first_name or ''} {callback.from_user.last_name or ''}".strip()
+            await create_user(
+                session,
+                tg_id=callback.from_user.id,
+                username=callback.from_user.username,
+                first_name=callback.from_user.first_name,
+                last_name=callback.from_user.last_name,
+                full_name=full_name
+            )
+            
+            await callback.message.answer(
+                "Assalomu alaykum! Telefon raqamingizni yuboring.\n\n"
+                "📱 Kontakt yuborish tugmasini bosing yoki\n"
+                "✍️ Qo'lda yozish tugmasini bosing.\n\n"
+                "Bu siz bilan bog'lanishimiz uchun kerak.",
+                reply_markup=get_phone_keyboard()
+            )
+        elif not user.phone_number:
+            # User exists but no phone number
+            await callback.message.answer(
+                "Assalomu alaykum! Telefon raqamingizni yuboring.\n\n"
+                "📱 Kontakt yuborish tugmasini bosing yoki\n"
+                "✍️ Qo'lda yozish tugmasini bosing.\n\n"
+                "Bu siz bilan bog'lanishimiz uchun kerak.",
+                reply_markup=get_phone_keyboard()
+            )
+        else:
+            # User exists with phone number - show main menu
+            await show_main_menu(callback.message)
