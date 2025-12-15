@@ -22,7 +22,7 @@ propcache==0.4.1
 pydantic==2.11.10
 pydantic_core==2.33.2
 python-dotenv==1.2.1
-SQLAlchemy==2.0.44
+SQLAlchemy==2.0.45
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 yarl==1.22.0
