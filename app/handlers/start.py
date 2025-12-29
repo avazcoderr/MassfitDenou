@@ -261,7 +261,7 @@ async def show_main_menu(message: Message):
         "<b>👇 <u>Boshlash uchun maqsadingizni tanlang!</u></b>\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
         "<b>🔒 Sifat kafolati:</b>  \n"
-        "MassFit mahsulotlari sifati — <b>JasurBarber</b> tomonidan to'liq kafolatlanadi.  \n"
+        "MassFit mahsulotlari sifati - <b>JasurBarber</b> tomonidan to'liq kafolatlanadi.  \n"
         "💯 Halol, organik va sinovdan o'tgan mahsulotlar!"
     )
     await message.answer(

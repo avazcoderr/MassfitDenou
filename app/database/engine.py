@@ -11,7 +11,7 @@ else:
     if os.path.exists(local_env):
         load_dotenv(local_env)
 
-# Do NOT import DATABASE_URL from app.config here — read from env to avoid using a wrong value
+# Do NOT import DATABASE_URL from app.config here - read from env to avoid using a wrong value
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL environment variable is not set")
@@ -29,6 +29,6 @@ engine = create_async_engine(DATABASE_URL, echo=False)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
 
-async def get_session() -> AsyncSession:
+async def get_session() -> AsyncSession:  # type: ignore
     async with async_session_maker() as session:
         yield session
